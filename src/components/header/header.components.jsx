@@ -2,6 +2,7 @@ import React from 'react';
 import {Link} from 'react-router-dom';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
+import { HeaderContainer, LogoContainer, OptionsContainer, OptionLink, OptionDiv} from './header.styledComp';
 
 import {ReactComponent as Logo} from '../../assets/crown.svg';
 import { auth } from '../../firebase/firebase.utils';
@@ -9,27 +10,61 @@ import CartIcon from '../cart-icon/cart-icon.components';
 import CartDropDown from '../cart-dropdown/cart-dropdown.components';
 import { selectCartHidden } from '../../redux/cart/cart.selectors';
 import { selectCurrentUser } from '../../redux/user/user.selectors';
+import { signOutStart } from '../../redux/user/user.actions';
+// import './header.styles.scss';
 
-import './header.styles.scss';
+const Header = ({currentUser, hidden, signOutStart}) => (
+    // <div className='header'>
+    //     <Link className='logo-container' to="/">
+    //         <Logo className='logo' />
+    //     </Link>
+    //     <div className='options'>
+    //         <Link className='option' to='/shop'>SHOP</Link>
+    //         <Link className='option' to='/shop'>CONTACT</Link>
+    //         {currentUser ? 
+    //         (<div className='option' onClick={() => auth.signOut()}>SIGN OUT</div>
+    //         ) : (
+    //         <Link className='option' to='/signIn'>SIGN IN</Link>
+    //         )}
+    //          <CartIcon/>
+    //     </div>
+    //     {hidden ? null : <CartDropDown/>}
+        
+    // </div>
 
-const Header = ({currentUser, hidden}) => (
-    <div className='header'>
-        <Link className='logo-container' to="/">
+    //render HTML using styled component instead of css
+
+    <HeaderContainer>
+        <LogoContainer to="/">
             <Logo className='logo' />
-        </Link>
-        <div className='options'>
-            <Link className='option' to='/shop'>SHOP</Link>
-            <Link className='option' to='/shop'>CONTACT</Link>
-            {currentUser ? 
-            (<div className='option' onClick={() => auth.signOut()}>SIGN OUT</div>
+        </LogoContainer>
+        <OptionsContainer>
+            <OptionLink to='/shop'>SHOP</OptionLink>
+            <OptionLink to='/shop'>CONTACT</OptionLink>
+            {/* {currentUser ? 
+            (<OptionDiv onClick={() => auth.signOut()}>SIGN OUT</OptionDiv>
             ) : (
-            <Link className='option' to='/signIn'>SIGN IN</Link>
+            <OptionLink to='/signIn'>SIGN IN</OptionLink>
+            )} 
+            
+            // we can also use OptionLink for option div and we have to use the ppt as='div' so it render the div tag
+            */} 
+            {/* {currentUser ? 
+            (<OptionLink as='div' onClick={() => auth.signOut()}>SIGN OUT</OptionLink>
+            ) : (
+            <OptionLink to='/signIn'>SIGN IN</OptionLink>
+            )} */}
+            {/* the below signout is using redux saga */}
+            {currentUser ? 
+            (<OptionLink as='div' onClick={signOutStart}>SIGN OUT</OptionLink>
+            ) : (
+            <OptionLink to='/signIn'>SIGN IN</OptionLink>
             )}
              <CartIcon/>
-        </div>
+        </OptionsContainer>
         {hidden ? null : <CartDropDown/>}
         
-    </div>
+    </HeaderContainer>
 );
 
 // const mapStateToProps = (state) => ({  // the below and this are same. in the above methid we use the object destructuring
@@ -54,5 +89,9 @@ const mapStateToProps = createStructuredSelector({ // the above function can abe
     hidden: selectCartHidden
 })
 
-export default connect(mapStateToProps)(Header); // this connect is the higher order func. it takes the component as the argument and retruns a new component. the first arg will be the root reducer func which we create as mapStateToProps
+const mapDispatchToProps = dispatch => ({
+    signOutStart: () => dispatch(signOutStart())
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(Header); // this connect is the higher order func. it takes the component as the argument and retruns a new component. the first arg will be the root reducer func which we create as mapStateToProps
 //with the help of redux connect method we are passing the currentUser as null to the Header component.

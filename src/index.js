@@ -7,8 +7,8 @@ import { PersistGate } from 'redux-persist/integration/react';
 import {store, persistor } from './redux/store';
 
 import './index.css';
-import App from './App';
-
+// import App from './App';
+import App from './App-hook';
 
 ReactDOM.render( //BrowserRouter component is we around the Application and this component provides all of the routing functionalities that this library have to the application that sitting between this
   //we wrap the Provider around the entire appln. bcoz everything wrap inside this component have to get access to the store object we get from redux

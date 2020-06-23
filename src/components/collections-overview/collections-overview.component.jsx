@@ -6,15 +6,19 @@ import CollectionPreview from '../preview-collections/preview-collection.compone
 
 import './collections-overview.styles.scss';
 
-const CollectionsOveriew = ({collections}) => (
-    <div className='collections-overview'>
+const CollectionsOveriew = ({collections}) => {
+    console.log(collections);
+    return (
+        <div className='collections-overview'>
         { // this collections.map function wont work as we change the shop.data.js file to object intead of array. so we create a new selector in shop.selector that will convert object into array
             collections.map(({id, ...otherCollectionProps}) => (
                 <CollectionPreview key={id} {...otherCollectionProps}/>
-            ))
+        ))
         }
-    </div>
-);
+        </div>
+    )
+    
+};
 
 const mapStateToProps = createStructuredSelector({
     collections: selectCollectionsForPreview
