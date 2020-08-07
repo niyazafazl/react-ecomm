@@ -10,4 +10,4 @@ const CartItem = ({item: { imageUrl, price, name, quantity}}) => (
         </div>
     </div>
 );
-export default CartItem;
+export default React.memo(CartItem); //this is react memroization foused in functional components for the optimization purpose, this will avoid the unnecessary renrendering of thei components

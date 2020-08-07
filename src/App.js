@@ -1,16 +1,19 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 
 import {Switch, Route, Link, Redirect } from 'react-router-dom';
 import { connect } from'react-redux';
 import { createStructuredSelector } from 'reselect';
 
-import './App.css';
-import HomePage from './pages/homepage/homepage.component';
-import ShopPage from './pages/shop/shop.component';
+import Spinner from './components/spinner/spinner.component'; 
+import ErrorBoundary from './components/error-boundary/error-boundary.component';
+// import './App.css';
+// import HomePage from './pages/homepage/homepage.component';
+// import ShopPage from './pages/shop/shop.component';
 import Header from './components/header/header.components';
-import SignInAndSignUpPage from './pages/sign-in-and-sign-up/sign-in-sign-up.components';
-import CheckoutPage from './pages/checkout/checkout.components';
+// import SignInAndSignUpPage from './pages/sign-in-and-sign-up/sign-in-sign-up.components';
+// import CheckoutPage from './pages/checkout/checkout.components';
 // import WithSpinner from './components/with-spinner/with-spinner.component';
+import { GlobalStyle } from './global.styles';
 
 import { auth, createUserProfileDocument, addCollectionAndDocuments , firestore, convertCollectionSnapshotToMap} from './firebase/firebase.utils';
 import { checkUserSession } from './redux/user/user.actions';
@@ -18,7 +21,15 @@ import { updateCollections } from './redux/shop/shop.actions';
 import { selectCurrentUser } from './redux/user/user.selectors';
 import { selectCollectionsForPreview, selectIsCollectionLoaded } from './redux/shop/shop.selectors';
 // import CollectionPage from './pages/collection/collection.component';
-import CollectionPageContainer from './pages/collection/collection.container';
+// import CollectionPageContainer from './pages/collection/collection.container';
+
+const HomePage = lazy(() => import('./pages/homepage/homepage.component')); //our home page is now lazy loaded, it means when the appln mounts first time, app,js code get the chunk of every code except the home page.
+//The moment the home page needs to be rendered actually, when click on the Router path, then homepage will get lazy loaded. However the lazy method is asynchronous, the home page has a chance it might not exist and also depneds on how fast our server loads. so wehn we request from the backend it may take some time, the use may see nothing or get some error.
+//Inorder to avoid this, can use react suspense, is a new react compoenent that allows us to wrap any part of the appln that might be rendering the asyncronous components
+const ShopPage = lazy(() => import ('./pages/shop/shop.component'));
+const SignInAndSignUpPage = lazy(() => import('./pages/sign-in-and-sign-up/sign-in-sign-up.components'));
+const CheckoutPage = lazy(() => import('./pages/checkout/checkout.components'));
+const CollectionPageContainer = lazy(() => import('./pages/collection/collection.container'));
 
 // const CollectionPageWithSpinner = WithSpinner(CollectionPage);
 const TopicsList = (props) => {
@@ -105,23 +116,32 @@ render() {
   const { isCollectionLoaded } = this.props;
   return (
     <div>
+      {/* this will apply those styles into our appln */}
+      <GlobalStyle/>
       <Header/>
        <Switch>
-        <Route exact path='/' component={HomePage}/>
-        <Route exact path='/shop' component={ShopPage}/>
-        <Route exact path='/checkout' component={CheckoutPage} />
-        <Route exact path='/signIn' render={() => this.props.currentUser ? (<Redirect to='/' />) : <SignInAndSignUpPage/>} />
-        <Route exact path='/topics' component={TopicsList}/>
-        <Route path='/topics/:topicId' component={TopicsDetail}/>
-        
-        {/* <Route path='/shop/:collectionId' component={CollectionPage} /> */}
-        {/* <Route path='/shop/:collectionId' 
-              render={(props) => (
-              <CollectionPageWithSpinner isLoading={!isCollectionLoaded} {...props}/>
-          )}/> */}
-        {/* change the above router into using the Container HOC */}
-          <Route path='/shop/:collectionId' 
-                 component={CollectionPageContainer}/>
+         <ErrorBoundary>
+       {/* //fallback attribute we can set any HTML to show before the page loads. here we use the <Spinner> component's html
+       we can wrap multiple components or routes inside suspende, it will wait untill all the compoenents load */}
+        <Suspense fallback={<Spinner/>} >
+          <Route exact path='/' component={HomePage}/>       
+          <Route exact path='/shop' component={ShopPage}/>          
+          <Route exact path='/checkout' component={CheckoutPage} />
+          <Route exact path='/signIn' render={() => this.props.currentUser ? (<Redirect to='/' />) : <SignInAndSignUpPage/>} />
+          
+          {/* <Route path='/shop/:collectionId' component={CollectionPage} /> */}
+          {/* <Route path='/shop/:collectionId' 
+                render={(props) => (
+                <CollectionPageWithSpinner isLoading={!isCollectionLoaded} {...props}/>
+            )}/> */}
+          {/* change the above router into using the Container HOC */}
+            <Route path='/shop/:collectionId' 
+                  component={CollectionPageContainer}/>
+          </Suspense>
+        </ErrorBoundary>
+          <Route exact path='/topics' component={TopicsList}/>
+          <Route path='/topics/:topicId' component={TopicsDetail}/>
+          
        </Switch>
     </div>
   );
